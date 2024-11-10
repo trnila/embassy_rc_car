@@ -57,6 +57,7 @@ static SPEED: Signal<CriticalSectionRawMutex, f32> = Signal::new();
 static ULTRASOUNDS: Signal<CriticalSectionRawMutex, [ultrasound::UltrasoundResult; 6]> =
     Signal::new();
 static SERVO_DEGREE: Signal<CriticalSectionRawMutex, f32> = Signal::new();
+static KL15: Signal<CriticalSectionRawMutex, u16> = Signal::new();
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {

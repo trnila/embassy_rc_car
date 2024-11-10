@@ -9,7 +9,7 @@ use embassy_time::Timer;
 use crate::{
     messages::{self, Messages},
     ultrasound::UltrasoundResult,
-    SERVO_DEGREE, SPEED, ULTRASOUNDS,
+    KL15, SERVO_DEGREE, SPEED, ULTRASOUNDS,
 };
 
 fn to_embassy_frame<F: embedded_can::Frame>(frame: F) -> FdFrame {
@@ -60,6 +60,7 @@ pub async fn can_tx(mut can_tx: CanTx<'static>) {
     let mut msg_rear = messages::RearDist::new(3, 2, 1).unwrap();
     let mut msg_front = messages::FrontDist::new(3, 2, 1).unwrap();
     let mut msg_speed = messages::SpeedKmh::new(i as f32).unwrap();
+    let mut msg_kl15 = messages::Kl15::new(false, 0).unwrap();
 
     loop {
         if let Some(val) = SPEED.try_take() {
@@ -79,9 +80,15 @@ pub async fn can_tx(mut can_tx: CanTx<'static>) {
             msg_rear.set_rear_dist_3(map(results[5])).unwrap();
         }
 
+        if let Some(millivolts) = KL15.try_take() {
+            msg_kl15.set_kl15_voltage(millivolts).unwrap();
+            msg_kl15.set_kl15_on(millivolts > 11000).unwrap();
+        }
+
         can_tx.write_fd(&to_embassy_frame(msg_rear)).await;
         can_tx.write_fd(&to_embassy_frame(msg_front)).await;
         can_tx.write_fd(&to_embassy_frame(msg_speed)).await;
+        can_tx.write_fd(&to_embassy_frame(msg_kl15)).await;
 
         Timer::after_millis(250).await;
         i = i.wrapping_add(1);

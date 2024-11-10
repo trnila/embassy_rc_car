@@ -147,6 +147,10 @@ BO_ 1623 CFG_Acc_FastCalibration: 4 OrinECU_C1
  SG_ Acc_SetCalibTarget_Z : 16|2@1+ (1,0) [0|3] ""  PEAK_GSM
  SG_ Acc_StartFastCalib : 24|1@1+ (1,0) [0|1] ""  PEAK_GSM
 
+BO_ 5 KL15: 3 STM_ECU
+ SG_ KL15_on : 0|1@1+ (1,0) [0|1] "" OrinECU_C1
+ SG_ KL15_voltage : 8|16@1+ (1,0) [0|20000] "mV" OrinECU_C1
+
 BO_ 4 REAR_DIST: 6 STM_ECU
  SG_ Rear_dist_3 : 32|16@1+ (1,0) [0|10000] "mm"  OrinECU_C1
  SG_ Rear_dist_2 : 16|16@1+ (1,0) [0|10000] "mm"  OrinECU_C1
