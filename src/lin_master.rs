@@ -8,6 +8,8 @@ use embassy_time::{with_timeout, Duration, Timer};
 use embedded_io_async::{Read, Write};
 use lin_bus::{Frame, PID};
 
+use crate::color_transition::ColorTransition;
+
 const LIN_FRAME_OFFSET: u8 = 5;
 const LIN_FRAME_RGB: u8 = LIN_FRAME_OFFSET;
 const LIN_FRAME_LEDS: u8 = 1 + LIN_FRAME_OFFSET;
@@ -104,6 +106,8 @@ impl LinMaster {
 #[task]
 pub async fn lin_scheduler(mut lin: LinMaster) {
     let mut led = 1u8;
+    let mut color = ColorTransition::new(&[(255, 0, 0), (0, 255, 0), (0, 0, 255)]);
+
     loop {
         let f = lin_bus::Frame::from_data(PID::from_id(LIN_FRAME_LEDS), &[led]);
         lin.write_frame(&f).await.unwrap();
@@ -113,7 +117,8 @@ pub async fn lin_scheduler(mut lin: LinMaster) {
             led = 1;
         }
 
-        let f = lin_bus::Frame::from_data(PID::from_id(LIN_FRAME_RGB), &[255, 0, 0]);
+        let (r, g, b) = color.next();
+        let f = lin_bus::Frame::from_data(PID::from_id(LIN_FRAME_RGB), &[r, g, b]);
         lin.write_frame(&f).await.unwrap();
 
         Timer::after_millis(100).await;

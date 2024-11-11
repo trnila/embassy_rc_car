@@ -35,6 +35,7 @@ use {defmt_rtt as _, panic_probe as _};
 
 mod blinky;
 mod can_scheduler;
+mod color_transition;
 mod kl15;
 mod lin_master;
 mod messages;
