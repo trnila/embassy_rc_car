@@ -72,8 +72,12 @@ pub async fn can_tx(mut can_tx: CanTx<'static>) {
                 UltrasoundResult::Fail => 0x0u16,
                 UltrasoundResult::Measurement(val) => val as u16,
             };
-            msg_front.set_front_dist_1(map(results[0])).unwrap();
-            msg_front.set_front_dist_2(map(results[1])).unwrap();
+            if let UltrasoundResult::Measurement(val) = results[0] {
+                msg_front.set_front_dist_1(val as u16).unwrap();
+            }
+            if let UltrasoundResult::Measurement(val) = results[1] {
+                msg_front.set_front_dist_2(val as u16).unwrap();
+            }
             msg_front.set_front_dist_3(map(results[2])).unwrap();
             msg_rear.set_rear_dist_1(map(results[3])).unwrap();
             msg_rear.set_rear_dist_2(map(results[4])).unwrap();

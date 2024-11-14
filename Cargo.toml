@@ -17,6 +17,7 @@ embassy-time = { version = "0.3.2", features = ["tick-hz-1_000_000"] }
 embedded-can = "0.4.1"
 embedded-io-async = "0.6.1"
 lin-bus = "0.4.0"
+movavg = { version = "2.3.0", default-features = false }
 panic-halt = "0.2.0"
 panic-probe = { version = "0.3.2", features = ["print-defmt"], optional = true }
 static_cell = "2.1.0"

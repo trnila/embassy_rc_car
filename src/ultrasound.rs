@@ -2,6 +2,7 @@ use defmt::info;
 use embassy_executor::task;
 use embassy_stm32::{exti::ExtiInput, gpio::Output};
 use embassy_time::{with_timeout, Instant, Timer};
+use movavg::MovAvg;
 
 use crate::ULTRASOUNDS;
 
@@ -46,12 +47,30 @@ async fn measure_ultrasound(
 
 #[task]
 pub async fn ultrasound(mut ultrasounds: [(i32, Output<'static>, ExtiInput<'static>); 6]) {
+    let mut avg: [MovAvg<u64, i64, 12>; 6] = [
+        MovAvg::new(),
+        MovAvg::new(),
+        MovAvg::new(),
+        MovAvg::new(),
+        MovAvg::new(),
+        MovAvg::new(),
+    ];
+
     loop {
         let mut results = [UltrasoundResult::Fail; 6];
-        for (ch, ref mut trigger, ref mut echo) in ultrasounds.iter_mut() {
-            let result = measure_ultrasound(trigger, echo).await;
-            results[*ch as usize] = result;
 
+        for (ch, ref mut trigger, ref mut echo) in ultrasounds.iter_mut().take(2) {
+            let mut result = measure_ultrasound(trigger, echo).await;
+
+            if let UltrasoundResult::Measurement(val) = result {
+                avg[*ch as usize].feed(val);
+            }
+
+            if let Ok(val) = avg[*ch as usize].try_get() {
+                result = UltrasoundResult::Measurement(val);
+            }
+
+            results[*ch as usize] = result;
             info!("ultrasound {} {:?}", ch, result);
         }
 
