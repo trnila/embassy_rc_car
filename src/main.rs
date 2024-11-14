@@ -19,6 +19,7 @@ use embassy_stm32::gpio::Output;
 use embassy_stm32::gpio::OutputType;
 use embassy_stm32::gpio::Pull;
 use embassy_stm32::gpio::Speed;
+use embassy_stm32::pac::IWDG;
 use embassy_stm32::peripherals::*;
 use embassy_stm32::time::hz;
 use embassy_stm32::timer::qei::Qei;
@@ -28,9 +29,11 @@ use embassy_stm32::timer::simple_pwm::SimplePwm;
 use embassy_stm32::timer::Channel;
 use embassy_stm32::usart::BufferedUart;
 use embassy_stm32::usart::Uart;
+use embassy_stm32::wdg::IndependentWatchdog;
 use embassy_stm32::{bind_interrupts, can, usart, Config};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::signal::Signal;
+use embassy_time::Timer;
 use {defmt_rtt as _, panic_probe as _};
 
 mod blinky;
@@ -60,6 +63,15 @@ static ULTRASOUNDS: Signal<CriticalSectionRawMutex, [ultrasound::UltrasoundResul
 static SERVO_DEGREE: Signal<CriticalSectionRawMutex, f32> = Signal::new();
 static KL15: Signal<CriticalSectionRawMutex, u16> = Signal::new();
 
+#[embassy_executor::task]
+async fn watchdog_task(mut wdg: IndependentWatchdog<'static, IWDG>) {
+    wdg.unleash();
+    loop {
+        Timer::after_secs(1).await;
+        wdg.pet();
+    }
+}
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let mut config = Config::default();
@@ -78,6 +90,9 @@ async fn main(spawner: Spawner) {
         config.rcc.sys = Sysclk::PLL1_R;
     }
     let peripherals = embassy_stm32::init(config);
+
+    let wdg = IndependentWatchdog::new(peripherals.IWDG, 2_000_000);
+    spawner.spawn(watchdog_task(wdg)).unwrap();
 
     let qei = Qei::new(
         peripherals.TIM2,
