@@ -144,13 +144,14 @@ async fn main(spawner: Spawner) {
     let led_pin = Output::new(peripherals.PA11, Level::Low, Speed::Low);
 
     let ultrasounds = [
+        /*
         (
-            0,
+            4,
             Output::new(peripherals.PB9, Level::Low, Speed::VeryHigh),
             ExtiInput::new(peripherals.PB0, peripherals.EXTI0, Pull::Down),
         ),
         (
-            1,
+            5,
             Output::new(peripherals.PB10, Level::Low, Speed::VeryHigh),
             ExtiInput::new(peripherals.PB1, peripherals.EXTI1, Pull::Down),
         ),
@@ -164,13 +165,14 @@ async fn main(spawner: Spawner) {
             Output::new(peripherals.PB12, Level::Low, Speed::VeryHigh),
             ExtiInput::new(peripherals.PB3, peripherals.EXTI3, Pull::Down),
         ),
+        */
         (
-            4,
+            0,
             Output::new(peripherals.PB13, Level::Low, Speed::VeryHigh),
             ExtiInput::new(peripherals.PB4, peripherals.EXTI4, Pull::Down),
         ),
         (
-            5,
+            1,
             Output::new(peripherals.PB14, Level::Low, Speed::VeryHigh),
             ExtiInput::new(peripherals.PB5, peripherals.EXTI5, Pull::Down),
         ),

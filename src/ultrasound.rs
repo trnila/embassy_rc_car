@@ -46,20 +46,12 @@ async fn measure_ultrasound(
 }
 
 #[task]
-pub async fn ultrasound(mut ultrasounds: [(i32, Output<'static>, ExtiInput<'static>); 6]) {
-    let mut avg: [MovAvg<u64, i64, 12>; 6] = [
-        MovAvg::new(),
-        MovAvg::new(),
-        MovAvg::new(),
-        MovAvg::new(),
-        MovAvg::new(),
-        MovAvg::new(),
-    ];
-
+pub async fn ultrasound(mut ultrasounds: [(i32, Output<'static>, ExtiInput<'static>); 2]) {
+    let mut avg: [MovAvg<u64, i64, 12>; 2] = [MovAvg::new(), MovAvg::new()];
     loop {
         let mut results = [UltrasoundResult::Fail; 6];
 
-        for (ch, ref mut trigger, ref mut echo) in ultrasounds.iter_mut().take(2) {
+        for (ch, ref mut trigger, ref mut echo) in ultrasounds.iter_mut() {
             let mut result = measure_ultrasound(trigger, echo).await;
 
             if let UltrasoundResult::Measurement(val) = result {
@@ -75,7 +67,5 @@ pub async fn ultrasound(mut ultrasounds: [(i32, Output<'static>, ExtiInput<'stat
         }
 
         ULTRASOUNDS.signal(results);
-
-        Timer::after_millis(50).await;
     }
 }
